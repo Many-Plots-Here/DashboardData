@@ -94,24 +94,24 @@ plot3 = plot2 + scale_y_continuous(breaks =  c(0, 10, 20, 40, 50),
 plot4 = plot3 + theme(plot.caption = element_text(hjust = 0), 
                       plot.title = element_text(hjust = 0.5))
 
-#add values 
-paste0(round(tableFreq$Percent,2), '%')
 
-LABELS=paste0(round(tableFreq$Percent,2), '%')
+#add values, attach to labels
+#LABELS=paste0(round(tableFreq$Percent,2), '%')
 ###
 plot5 = plot4 + geom_text(vjust=0, #hjust if flipping
                           size = 3,
                           aes(y = Percent ,
-                              label = LABELS))
+                              label = paste0(round(Percent,2), '%')))
 
-plot5 + annotate("text", x = 6, y = 30, 
+plot6 = plot5 + annotate("text", x = 6, y = 30, 
                  label="There are more than 2x as many 
                  elementary schools than high schools", size=2.5) + annotate("text", x=2.75, y = 11, 
            label="Jr. high, PK only, PK-12, and K-12 schools 
            make up ~10% of schools", size=2.5)
+plot6
 
 #save the RDS 
-saveRDS(plot5, 'WashingtonSchoolTypes.rds')
+saveRDS(plot6, 'WashingtonSchoolTypes.rds')
 
 ```
 ```{r}
@@ -160,9 +160,52 @@ plot8b
 saveRDS(plot8b, 'Over10KPlot.rds')
 
 ```
-```{r}
 
+
+
+
+
+```{r}
+# link data
+link_mapdata = url("https://github.com/Many-Plots-Here/realdeliverable3/raw/main/mapdata2.rds")
+
+#load(link_mapdata)
+mapdata <- readRDS(link_mapdata)
+
+# load basemap data
+myGit="https://github.com/Many-Plots-Here/realdeliverable3/"
+myGeo="raw/main/Washington_School_District_Boundaries_Masked.geojson"
+mapLink=paste0(myGit, myGeo)
+
+# Import WA County dataset
+library(sf)
+wadist <- read_sf(mapLink)
+
+# basemap
+library(ggplot2)
+base=ggplot(data=wadist, aes(geometry=geometry)) + theme_classic()
+basemap=base + geom_sf(fill='grey', color=NA)
+
+basemap
+
+ratiomap <- basemap + geom_sf(data = mapdata, aes(fill=sturatio, geometry=geometry), color=NA) 
+ratiomap
+
+gradientmap <- ratiomap + scale_fill_gradient(low = "#deebf7", high = "#3182bd")
+gradientmap
+
+titleText='Student to school ratio in WA by school district'
+sourceText='Sources: Washington Geospatial Open Data Portal and Washington OSPI'
+
+#final map with title and sources
+finalmap1 <- gradientmap + labs(title=titleText, x = NULL, y = NULL, caption = sourceText) + guides(fill=guide_legend(title="Student to school ratio"))
+finalmap1
+
+# save file
+saveRDS(finalmap1, file = "finalmap1.rds")
 ```
+
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 

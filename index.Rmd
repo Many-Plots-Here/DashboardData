@@ -41,6 +41,6 @@ Row
 ### Multivariate
 
 ```{r}
-
+readRDS("finalmap1.rds")
 ```
 
